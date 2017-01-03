@@ -25,9 +25,9 @@ const (
 )
 
 const (
-	DATE_FORMAT             = "2006-01-02"
-	DATE_TIME_FORMAT        = "2006-01-02 15:04:05.000"
-	LOG_FORMAT_PREFIX_PRINT = "[%-5s] [%s] : %s -> %s \n"
+	DEFAULT_DATE_FORMAT      = "2006-01-02"
+	DEFAULT_DATE_TIME_FORMAT = "2006-01-02 15:04:05.000"
+	LOG_FORMAT_PREFIX_PRINT  = "[%-5s] [%s] : %s -> %s \n"
 )
 
 var (
@@ -42,6 +42,26 @@ func init() {
 	}
 }
 
+type config struct {
+	dateFormat     string
+	dateTimeFormat string
+}
+
+func NewConfig() *config {
+	return &config{
+		dateFormat:     DEFAULT_DATE_FORMAT,
+		dateTimeFormat: DEFAULT_DATE_TIME_FORMAT,
+	}
+}
+
+func (cfg *config) SetDateFormat(dateFormat string) {
+	cfg.dateFormat = dateFormat
+}
+
+func (cfg *config) SetDateTimeFormat(dateTimeFormat string) {
+	cfg.dateTimeFormat = dateTimeFormat
+}
+
 type IPrinter interface {
 	Print(level LevelType, str string) error
 }
@@ -52,6 +72,7 @@ type ILogWriter interface {
 }
 
 type Logger struct {
+	*config
 	level   LevelType
 	writer  ILogWriter
 	printer IPrinter
@@ -69,6 +90,7 @@ func NewLogger(level LevelType, writer ILogWriter) *Logger {
 		level:   level,
 		writer:  writer,
 		printer: NewPrinter(),
+		config:  NewConfig(),
 	}
 
 	return logger
@@ -79,7 +101,7 @@ func (log *Logger) doLog(level LevelType, msg string, args ...interface{}) {
 	t := time.Now()
 	caller := getFuncCaller(3)
 	if level >= log.level {
-		log.printer.Print(level, fmt.Sprintf(LOG_FORMAT_PREFIX_PRINT, getLevelFlagMsg(level), getDateTimeStr(t), caller, fMsg))
+		log.printer.Print(level, fmt.Sprintf(LOG_FORMAT_PREFIX_PRINT, getLevelFlagMsg(level), log.getDateTimeStr(t), caller, fMsg))
 	}
 	if log.writer != nil {
 		le := pool.Get().(*LogEntity)
@@ -116,12 +138,12 @@ func (log *Logger) Close() error {
 	return nil
 }
 
-func getDateStr(t time.Time) string {
-	return t.Format(DATE_FORMAT)
+func (log *Logger) getDateStr(t time.Time) string {
+	return t.Format(log.dateFormat)
 }
 
-func getDateTimeStr(t time.Time) string {
-	return t.Format(DATE_TIME_FORMAT)
+func (log *Logger) getDateTimeStr(t time.Time) string {
+	return t.Format(log.dateTimeFormat)
 }
 
 func getLevelFlagMsg(level LevelType) string {

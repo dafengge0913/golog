@@ -9,12 +9,20 @@ import (
 )
 
 const (
-	CACHE_SIZE             = 1024
-	SAVE_INTERVAL          = time.Second * 3
+	DEFAULT_CACHE_SIZE     = 1024
+	DEFAULT_SAVE_INTERVAL  = time.Second * 3
 	LOG_FORMAT_PREFIX_FILE = "[%-5s] [%s] : %s -> %s \n"
 )
 
+type logWriterConfig struct {
+	cacheSize      uint32
+	saveInterval   time.Duration
+	dateFormat     string
+	dateTimeFormat string
+}
+
 type LogWriterFile struct {
+	*logWriterConfig
 	bus            chan *LogEntity
 	tickChan       *time.Ticker
 	level          LevelType
@@ -24,23 +32,50 @@ type LogWriterFile struct {
 	rotateFileDate time.Time
 }
 
-func NewLogWriterFile(level LevelType, path string, fileName string, rotate bool) (ILogWriter, error) {
+func NewLogWriterConfig() *logWriterConfig {
+	return &logWriterConfig{
+		cacheSize:      DEFAULT_CACHE_SIZE,
+		saveInterval:   DEFAULT_SAVE_INTERVAL,
+		dateFormat:     DEFAULT_DATE_FORMAT,
+		dateTimeFormat: DEFAULT_DATE_TIME_FORMAT,
+	}
+}
+
+func (cfg *logWriterConfig) SetCacheSize(cacheSize uint32) {
+	cfg.cacheSize = cacheSize
+}
+
+func (cfg *logWriterConfig) SetSaveInterval(saveInterval time.Duration) {
+	cfg.saveInterval = saveInterval
+}
+
+func (cfg *logWriterConfig) SetDateFormat(dateFormat string) {
+	cfg.dateFormat = dateFormat
+}
+
+func (cfg *logWriterConfig) SetDateTimeFormat(dateTimeFormat string) {
+	cfg.dateTimeFormat = dateTimeFormat
+}
+
+// config - using default config when nil
+func NewLogWriterFile(level LevelType, path string, fileName string, rotate bool, config *logWriterConfig) (*LogWriterFile, error) {
 	if !pathExists(path) {
 		return nil, fmt.Errorf("path not exists: %s", path)
 	}
-
+	if config == nil {
+		config = NewLogWriterConfig()
+	}
 	fileUrl := filepath.Join(path, fileName)
 	writer := &LogWriterFile{
-		level:      level,
-		fileUrl:    fileUrl,
-		curFileUrl: fileUrl + ".log",
-		rotate:     rotate,
-		bus:        make(chan *LogEntity, CACHE_SIZE),
-		tickChan:   time.NewTicker(SAVE_INTERVAL),
+		logWriterConfig: config,
+		bus:             make(chan *LogEntity, config.cacheSize),
+		tickChan:        time.NewTicker(config.saveInterval),
+		level:           level,
+		fileUrl:         fileUrl,
+		curFileUrl:      fileUrl + ".log",
+		rotate:          rotate,
 	}
-	if rotate {
-		writer.refreshRotateFile(time.Now())
-	}
+	writer.refreshRotateDate(time.Now())
 	go writer.serve()
 	return writer, nil
 }
@@ -72,11 +107,12 @@ func (w *LogWriterFile) Write(logEntity *LogEntity) error {
 
 func (w *LogWriterFile) Close() error {
 	w.tickChan.Stop()
-	if err := w.writeFile(); err != nil {
+	err := w.writeFile()
+	if err != nil {
 		fmt.Println("LogWriterFile log error: ", err)
 	}
 	close(w.bus)
-	return nil
+	return err
 }
 
 func (w *LogWriterFile) writeFile() error {
@@ -92,13 +128,13 @@ func (w *LogWriterFile) writeFile() error {
 			return errors.New("LogWriterFile bus is closed")
 		}
 		if w.rotate && logEntity.time.After(w.rotateFileDate) {
-			w.refreshRotateFile(logEntity.time)
+			w.refreshRotateDate(logEntity.time)
 			file, err = os.OpenFile(w.curFileUrl, os.O_APPEND|os.O_CREATE, 0666)
 			if err != nil {
 				return err
 			}
 		}
-		fMsg := fmt.Sprintf(LOG_FORMAT_PREFIX_FILE, getLevelFlagMsg(logEntity.level), getDateTimeStr(logEntity.time), logEntity.caller, logEntity.msg)
+		fMsg := fmt.Sprintf(LOG_FORMAT_PREFIX_FILE, getLevelFlagMsg(logEntity.level), w.getDateTimeStr(logEntity.time), logEntity.caller, logEntity.msg)
 		_, err = file.WriteString(fMsg)
 		pool.Put(logEntity)
 	}
@@ -106,9 +142,17 @@ func (w *LogWriterFile) writeFile() error {
 	return err
 }
 
+func (w *LogWriterFile) refreshRotateDate(t time.Time) {
+	if w.rotate {
+		w.rotateFileDate = time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location()).Add(time.Hour*24 - 1)
+		w.refreshRotateFile(t)
+	}
+}
+
 func (w *LogWriterFile) refreshRotateFile(t time.Time) {
-	w.rotateFileDate = time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location()).Add(time.Hour*24 - 1)
-	w.curFileUrl = w.fileUrl + "_" + getDateStr(t) + ".log"
+	if w.rotate {
+		w.curFileUrl = w.fileUrl + "_" + w.getDateStr(t) + ".log"
+	}
 }
 
 func pathExists(path string) bool {
@@ -116,4 +160,17 @@ func pathExists(path string) bool {
 		return false
 	}
 	return true
+}
+
+func (w *LogWriterFile) getDateStr(t time.Time) string {
+	return t.Format(w.dateFormat)
+}
+
+func (w *LogWriterFile) getDateTimeStr(t time.Time) string {
+	return t.Format(w.dateTimeFormat)
+}
+
+func (w *LogWriterFile) SetDateFormat(dateFormat string) {
+	w.logWriterConfig.SetDateFormat(dateFormat)
+	w.refreshRotateFile(w.rotateFileDate)
 }

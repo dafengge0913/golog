@@ -100,6 +100,7 @@ func (w *LogWriterFile) Write(logEntity *logEntity) error {
 		return nil
 	default:
 		w.writeFile()
+		w.Write(logEntity)
 		return errors.New("LogWriterFile bus overflow")
 	}
 
@@ -116,6 +117,9 @@ func (w *LogWriterFile) Close() error {
 }
 
 func (w *LogWriterFile) writeFile() error {
+	if len(w.bus) == 0 {
+		return nil
+	}
 	file, err := os.OpenFile(w.curFileUrl, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
 	if err != nil {
 		return err
@@ -123,20 +127,25 @@ func (w *LogWriterFile) writeFile() error {
 	defer file.Close()
 
 	for len(w.bus) > 0 {
-		logEntity, ok := <-w.bus
-		if !ok {
-			return errors.New("LogWriterFile bus is closed")
-		}
-		if w.rotate && logEntity.time.After(w.rotateFileDate) {
-			w.refreshRotateDate(logEntity.time)
-			file, err = os.OpenFile(w.curFileUrl, os.O_APPEND|os.O_CREATE, 0666)
-			if err != nil {
-				return err
+		select {
+		case logEntity, ok := <-w.bus:
+			if !ok {
+				return errors.New("LogWriterFile bus is closed")
 			}
+			if w.rotate && logEntity.time.After(w.rotateFileDate) {
+				w.refreshRotateDate(logEntity.time)
+				file, err = os.OpenFile(w.curFileUrl, os.O_APPEND|os.O_CREATE, 0666)
+				if err != nil {
+					return err
+				}
+			}
+			fMsg := fmt.Sprintf(defaultLogFormatPrefixFile, getLevelFlagMsg(logEntity.level), w.getDateTimeStr(logEntity.time), logEntity.caller, logEntity.msg)
+			_, err = file.WriteString(fMsg)
+			pool.Put(logEntity)
+		default:
+			return nil
 		}
-		fMsg := fmt.Sprintf(defaultLogFormatPrefixFile, getLevelFlagMsg(logEntity.level), w.getDateTimeStr(logEntity.time), logEntity.caller, logEntity.msg)
-		_, err = file.WriteString(fMsg)
-		pool.Put(logEntity)
+
 	}
 
 	return err

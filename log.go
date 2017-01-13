@@ -18,10 +18,10 @@ const (
 )
 
 const (
-	LevelDebugMsg = "Debug"
-	LevelInfoMsg  = "Info"
-	LevelWarnMsg  = "Warn"
-	LevelErrorMsg = "Error"
+	levelDebugMsg = "Debug"
+	levelInfoMsg  = "Info"
+	levelWarnMsg  = "Warn"
+	levelErrorMsg = "Error"
 )
 
 const (
@@ -149,13 +149,13 @@ func (log *Logger) getDateTimeStr(t time.Time) string {
 func getLevelFlagMsg(level LevelType) string {
 	switch level {
 	case LEVEL_DEBUG:
-		return LevelDebugMsg
+		return levelDebugMsg
 	case LEVEL_INFO:
-		return LevelInfoMsg
+		return levelInfoMsg
 	case LEVEL_WARN:
-		return LevelWarnMsg
+		return levelWarnMsg
 	case LEVEL_ERROR:
-		return LevelErrorMsg
+		return levelErrorMsg
 	default:
 		return ""
 	}

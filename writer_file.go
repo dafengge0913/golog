@@ -9,9 +9,9 @@ import (
 )
 
 const (
-	DEFAULT_CACHE_SIZE     = 1024
-	DEFAULT_SAVE_INTERVAL  = time.Second * 3
-	LOG_FORMAT_PREFIX_FILE = "[%-5s] [%s] : %s -> %s \n"
+	defaultCacheSize           = 1024
+	defaultSaveInterval        = time.Second * 3
+	defaultLogFormatPrefixFile = "[%-5s] [%s] : %s -> %s \n"
 )
 
 type logWriterConfig struct {
@@ -23,7 +23,7 @@ type logWriterConfig struct {
 
 type LogWriterFile struct {
 	*logWriterConfig
-	bus            chan *LogEntity
+	bus            chan *logEntity
 	tickChan       *time.Ticker
 	level          LevelType
 	fileUrl        string
@@ -34,10 +34,10 @@ type LogWriterFile struct {
 
 func NewLogWriterConfig() *logWriterConfig {
 	return &logWriterConfig{
-		cacheSize:      DEFAULT_CACHE_SIZE,
-		saveInterval:   DEFAULT_SAVE_INTERVAL,
-		dateFormat:     DEFAULT_DATE_FORMAT,
-		dateTimeFormat: DEFAULT_DATE_TIME_FORMAT,
+		cacheSize:      defaultCacheSize,
+		saveInterval:   defaultSaveInterval,
+		dateFormat:     defaultDateFormat,
+		dateTimeFormat: defaultDateTimeFormat,
 	}
 }
 
@@ -68,7 +68,7 @@ func NewLogWriterFile(level LevelType, path string, fileName string, rotate bool
 	fileUrl := filepath.Join(path, fileName)
 	writer := &LogWriterFile{
 		logWriterConfig: config,
-		bus:             make(chan *LogEntity, config.cacheSize),
+		bus:             make(chan *logEntity, config.cacheSize),
 		tickChan:        time.NewTicker(config.saveInterval),
 		level:           level,
 		fileUrl:         fileUrl,
@@ -91,7 +91,7 @@ func (w *LogWriterFile) serve() {
 	}
 }
 
-func (w *LogWriterFile) Write(logEntity *LogEntity) error {
+func (w *LogWriterFile) Write(logEntity *logEntity) error {
 	if logEntity.level < w.level {
 		return nil
 	}
@@ -134,7 +134,7 @@ func (w *LogWriterFile) writeFile() error {
 				return err
 			}
 		}
-		fMsg := fmt.Sprintf(LOG_FORMAT_PREFIX_FILE, getLevelFlagMsg(logEntity.level), w.getDateTimeStr(logEntity.time), logEntity.caller, logEntity.msg)
+		fMsg := fmt.Sprintf(defaultLogFormatPrefixFile, getLevelFlagMsg(logEntity.level), w.getDateTimeStr(logEntity.time), logEntity.caller, logEntity.msg)
 		_, err = file.WriteString(fMsg)
 		pool.Put(logEntity)
 	}

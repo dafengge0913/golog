@@ -18,16 +18,16 @@ const (
 )
 
 const (
-	LEVEL_DEBUG_MSG = "Debug"
-	LEVEL_INFO_MSG  = "Info"
-	LEVEL_WARN_MSG  = "Warn"
-	LEVEL_ERROR_MSG = "Error"
+	LevelDebugMsg = "Debug"
+	LevelInfoMsg  = "Info"
+	LevelWarnMsg  = "Warn"
+	LevelErrorMsg = "Error"
 )
 
 const (
-	DEFAULT_DATE_FORMAT      = "2006-01-02"
-	DEFAULT_DATE_TIME_FORMAT = "2006-01-02 15:04:05.000"
-	LOG_FORMAT_PREFIX_PRINT  = "[%-5s] [%s] : %s -> %s \n"
+	defaultDateFormat           = "2006-01-02"
+	defaultDateTimeFormat       = "2006-01-02 15:04:05.000"
+	defaultLogFormatPrefixPrint = "[%-5s] [%s] : %s -> %s \n"
 )
 
 var (
@@ -37,7 +37,7 @@ var (
 func init() {
 	pool = &sync.Pool{
 		New: func() interface{} {
-			return &LogEntity{}
+			return &logEntity{}
 		},
 	}
 }
@@ -49,8 +49,8 @@ type config struct {
 
 func NewConfig() *config {
 	return &config{
-		dateFormat:     DEFAULT_DATE_FORMAT,
-		dateTimeFormat: DEFAULT_DATE_TIME_FORMAT,
+		dateFormat:     defaultDateFormat,
+		dateTimeFormat: defaultDateTimeFormat,
 	}
 }
 
@@ -67,7 +67,7 @@ type IPrinter interface {
 }
 
 type ILogWriter interface {
-	Write(*LogEntity) error
+	Write(*logEntity) error
 	Close() error
 }
 
@@ -78,7 +78,7 @@ type Logger struct {
 	printer IPrinter
 }
 
-type LogEntity struct {
+type logEntity struct {
 	msg    string
 	level  LevelType
 	time   time.Time
@@ -101,10 +101,10 @@ func (log *Logger) doLog(level LevelType, msg string, args ...interface{}) {
 	t := time.Now()
 	caller := getFuncCaller(3)
 	if level >= log.level {
-		log.printer.Print(level, fmt.Sprintf(LOG_FORMAT_PREFIX_PRINT, getLevelFlagMsg(level), log.getDateTimeStr(t), caller, fMsg))
+		log.printer.Print(level, fmt.Sprintf(defaultLogFormatPrefixPrint, getLevelFlagMsg(level), log.getDateTimeStr(t), caller, fMsg))
 	}
 	if log.writer != nil {
-		le := pool.Get().(*LogEntity)
+		le := pool.Get().(*logEntity)
 		le.msg = fMsg
 		le.level = level
 		le.time = t
@@ -149,13 +149,13 @@ func (log *Logger) getDateTimeStr(t time.Time) string {
 func getLevelFlagMsg(level LevelType) string {
 	switch level {
 	case LEVEL_DEBUG:
-		return LEVEL_DEBUG_MSG
+		return LevelDebugMsg
 	case LEVEL_INFO:
-		return LEVEL_INFO_MSG
+		return LevelInfoMsg
 	case LEVEL_WARN:
-		return LEVEL_WARN_MSG
+		return LevelWarnMsg
 	case LEVEL_ERROR:
-		return LEVEL_ERROR_MSG
+		return LevelErrorMsg
 	default:
 		return ""
 	}

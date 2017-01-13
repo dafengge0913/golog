@@ -10,12 +10,12 @@ import (
 )
 
 const (
-	COLOR_WHITE  uintptr = 7
-	COLOR_GRAY   uintptr = 8
-	COLOR_GREEN  uintptr = 10
-	COLOR_BLUE   uintptr = 11
-	COLOR_RED    uintptr = 12
-	COLOR_YELLOW uintptr = 14
+	colorWhite  uintptr = 7
+	colorGray   uintptr = 8
+	colorGreen  uintptr = 10
+	colorBlue   uintptr = 11
+	colorRed    uintptr = 12
+	colorYellow uintptr = 14
 )
 
 type Printer struct {
@@ -78,15 +78,15 @@ func (printer *Printer) Print(level LevelType, str string) error {
 func (printer *Printer) getColorByLevel(level LevelType) uintptr {
 	switch level {
 	case LEVEL_DEBUG:
-		return COLOR_GRAY
+		return colorGray
 	case LEVEL_INFO:
-		return COLOR_GREEN
+		return colorGreen
 	case LEVEL_WARN:
-		return COLOR_YELLOW
+		return colorYellow
 	case LEVEL_ERROR:
-		return COLOR_RED
+		return colorRed
 	default:
-		return COLOR_WHITE
+		return colorWhite
 	}
 }
 

@@ -11,10 +11,10 @@ import (
 type LevelType uint8
 
 const (
-	LEVEL_DEBUG LevelType = iota
-	LEVEL_INFO
-	LEVEL_WARN
-	LEVEL_ERROR
+	LevelDebug LevelType = iota
+	LevelInfo
+	LevelWarn
+	LevelError
 )
 
 const (
@@ -116,19 +116,19 @@ func (log *Logger) doLog(level LevelType, msg string, args ...interface{}) {
 }
 
 func (log *Logger) Debug(msg string, args ...interface{}) {
-	log.doLog(LEVEL_DEBUG, msg, args...)
+	log.doLog(LevelDebug, msg, args...)
 }
 
 func (log *Logger) Info(msg string, args ...interface{}) {
-	log.doLog(LEVEL_INFO, msg, args...)
+	log.doLog(LevelInfo, msg, args...)
 }
 
 func (log *Logger) Warn(msg string, args ...interface{}) {
-	log.doLog(LEVEL_WARN, msg, args...)
+	log.doLog(LevelWarn, msg, args...)
 }
 
 func (log *Logger) Error(msg string, args ...interface{}) {
-	log.doLog(LEVEL_ERROR, msg, args...)
+	log.doLog(LevelError, msg, args...)
 }
 
 func (log *Logger) Close() error {
@@ -148,13 +148,13 @@ func (log *Logger) getDateTimeStr(t time.Time) string {
 
 func getLevelFlagMsg(level LevelType) string {
 	switch level {
-	case LEVEL_DEBUG:
+	case LevelDebug:
 		return levelDebugMsg
-	case LEVEL_INFO:
+	case LevelInfo:
 		return levelInfoMsg
-	case LEVEL_WARN:
+	case LevelWarn:
 		return levelWarnMsg
-	case LEVEL_ERROR:
+	case LevelError:
 		return levelErrorMsg
 	default:
 		return ""

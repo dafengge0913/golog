@@ -77,13 +77,13 @@ func (printer *Printer) Print(level LevelType, str string) error {
 
 func (printer *Printer) getColorByLevel(level LevelType) uintptr {
 	switch level {
-	case LEVEL_DEBUG:
+	case LevelDebug:
 		return colorGray
-	case LEVEL_INFO:
+	case LevelInfo:
 		return colorGreen
-	case LEVEL_WARN:
+	case LevelWarn:
 		return colorYellow
-	case LEVEL_ERROR:
+	case LevelError:
 		return colorRed
 	default:
 		return colorWhite

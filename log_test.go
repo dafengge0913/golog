@@ -10,12 +10,12 @@ import (
 func TestLogFile(t *testing.T) {
 	writeCfg := NewLogWriterConfig()
 	writeCfg.SetSaveInterval(time.Second)
-	writer, err := NewLogWriterFile(LEVEL_INFO, "E:/dfg", "demo_log", true, writeCfg)
+	writer, err := NewLogWriterFile(LevelInfo, "E:/dfg", "demo_log", true, writeCfg)
 	if err != nil {
 		t.Error("create log error:", err)
 		return
 	}
-	log := NewLogger(LEVEL_DEBUG, writer)
+	log := NewLogger(LevelDebug, writer)
 	log.Debug("test info111")
 	log.Info("test info2:%d : %s", 123, "abc")
 	time.Sleep(time.Second * 2)
@@ -32,12 +32,12 @@ func TestLogFile(t *testing.T) {
 func TestLogFileConcurrent(t *testing.T) {
 	writeCfg := NewLogWriterConfig()
 	writeCfg.SetSaveInterval(time.Second)
-	writer, err := NewLogWriterFile(LEVEL_INFO, "E:/dfg", "demo_log", true, writeCfg)
+	writer, err := NewLogWriterFile(LevelInfo, "E:/dfg", "demo_log", true, writeCfg)
 	if err != nil {
 		t.Error("create log error:", err)
 		return
 	}
-	log := NewLogger(LEVEL_DEBUG, writer)
+	log := NewLogger(LevelDebug, writer)
 	wg := &sync.WaitGroup{}
 	for r := 0; r < 1000; r++ {
 		wg.Add(1)

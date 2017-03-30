@@ -101,7 +101,10 @@ func (log *Logger) doLog(level LevelType, msg string, args ...interface{}) {
 	t := time.Now()
 	caller := getFuncCaller(3)
 	if level >= log.level {
-		log.printer.Print(level, fmt.Sprintf(defaultLogFormatPrefixPrint, getLevelFlagMsg(level), log.getDateTimeStr(t), caller, fMsg))
+		str := fmt.Sprintf(defaultLogFormatPrefixPrint, getLevelFlagMsg(level), log.getDateTimeStr(t), caller, fMsg)
+		if err := log.printer.Print(level, str); err != nil {
+			fmt.Print(str)
+		}
 	}
 	if log.writer != nil {
 		le := pool.Get().(*logEntity)

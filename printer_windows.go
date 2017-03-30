@@ -54,8 +54,7 @@ type smallRect struct {
 func (printer *Printer) Print(level LevelType, str string) error {
 
 	if !printer.isTerminal {
-		fmt.Print(str)
-		return nil
+		return ansiPrint(level, str)
 	}
 
 	origin, err := printer.getColor()

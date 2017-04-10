@@ -22,6 +22,7 @@ func TestLogFile(t *testing.T) {
 	log.SetDateTimeFormat(time.RFC1123)
 	log.Warn("test info3")
 	writer.SetDateFormat("2006@01@02")
+	log.SetFuncSkip(2)
 	log.Error("test info4")
 	if err := log.Close(); err != nil {
 		fmt.Println("log close error: ", err)

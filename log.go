@@ -28,6 +28,7 @@ const (
 	defaultDateFormat           = "2006-01-02"
 	defaultDateTimeFormat       = "2006-01-02 15:04:05.000"
 	defaultLogFormatPrefixPrint = "[%-5s] [%s] : %s -> %s \n"
+	defaultFuncSkip             = 3
 )
 
 var (
@@ -45,12 +46,14 @@ func init() {
 type config struct {
 	dateFormat     string
 	dateTimeFormat string
+	funcSkip       int
 }
 
 func NewConfig() *config {
 	return &config{
 		dateFormat:     defaultDateFormat,
 		dateTimeFormat: defaultDateTimeFormat,
+		funcSkip:       defaultFuncSkip,
 	}
 }
 
@@ -60,6 +63,10 @@ func (cfg *config) SetDateFormat(dateFormat string) {
 
 func (cfg *config) SetDateTimeFormat(dateTimeFormat string) {
 	cfg.dateTimeFormat = dateTimeFormat
+}
+
+func (cfg *config) SetFuncSkip(skip int) {
+	cfg.funcSkip = skip
 }
 
 type IPrinter interface {
@@ -99,7 +106,7 @@ func NewLogger(level LevelType, writer ILogWriter) *Logger {
 func (log *Logger) doLog(level LevelType, msg string, args ...interface{}) {
 	fMsg := fmt.Sprintf(msg, args...)
 	t := time.Now()
-	caller := getFuncCaller(3)
+	caller := getFuncCaller(log.funcSkip)
 	if level >= log.level {
 		str := fmt.Sprintf(defaultLogFormatPrefixPrint, getLevelFlagMsg(level), log.getDateTimeStr(t), caller, fMsg)
 		if err := log.printer.Print(level, str); err != nil {

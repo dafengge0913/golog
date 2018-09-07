@@ -44,6 +44,7 @@ func init() {
 }
 
 type config struct {
+	isPrint        bool
 	dateFormat     string
 	dateTimeFormat string
 	funcSkip       int
@@ -51,6 +52,7 @@ type config struct {
 
 func NewConfig() *config {
 	return &config{
+		isPrint:        true,
 		dateFormat:     defaultDateFormat,
 		dateTimeFormat: defaultDateTimeFormat,
 		funcSkip:       defaultFuncSkip,
@@ -67,6 +69,10 @@ func (cfg *config) SetDateTimeFormat(dateTimeFormat string) {
 
 func (cfg *config) SetFuncSkip(skip int) {
 	cfg.funcSkip = skip
+}
+
+func (cfg *config) SetIsPrint(isPrint bool) {
+	cfg.isPrint = isPrint
 }
 
 type IPrinter interface {
@@ -103,11 +109,19 @@ func NewLogger(level LevelType, writer ...ILogWriter) *Logger {
 	return logger
 }
 
+func (log *Logger) needPrint(level LevelType) bool {
+	return log.isPrint && level >= log.level
+}
+
 func (log *Logger) doLog(level LevelType, msg string, args ...interface{}) {
+	if !(log.needPrint(level) || len(log.writer) > 0) {
+		// not print not write
+		return
+	}
 	fMsg := fmt.Sprintf(msg, args...)
 	t := time.Now()
 	caller := getFuncCaller(log.funcSkip)
-	if level >= log.level {
+	if log.needPrint(level) {
 		str := fmt.Sprintf(defaultLogFormatPrefixPrint, getLevelFlagMsg(level), log.getDateTimeStr(t), caller, fMsg)
 		if err := log.printer.Print(level, str); err != nil {
 			fmt.Print(str)

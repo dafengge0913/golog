@@ -74,6 +74,14 @@ func TestMultiLogWriter(t *testing.T) {
 
 var n = 0
 
+func BenchmarkPrint(b *testing.B) {
+	log := NewLogger(LevelInfo)
+	for i := 0; i < b.N; i++ {
+		n++
+		log.Info("benchmark n=%d, n=%d, n=%d, n=%d, n=%d, n=%d, n=%d, n=%d", n, n, n, n, n, n, n, n)
+	}
+}
+
 func BenchmarkWriterFile(b *testing.B) {
 	writeCfg := NewLogWriterConfig()
 	writeCfg.SetSaveInterval(time.Second)
@@ -83,8 +91,7 @@ func BenchmarkWriterFile(b *testing.B) {
 		return
 	}
 	log := NewLogger(LevelInfo, writer)
-	log.Info("benchmark n=%d", n)
-	log.Error("benchmark error n=%d", n)
+	log.SetIsPrint(false)
 	for i := 0; i < b.N; i++ {
 		n++
 		log.Info("benchmark n=%d", n)

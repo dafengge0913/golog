@@ -154,7 +154,7 @@ func (log *Logger) doLog(level LevelType, msg string, args ...interface{}) {
 		le.time = t
 		le.caller = caller
 		if err := w.Write(le); err != nil {
-			fmt.Errorf("[Write Log Error] :%v", err)
+			fmt.Println("write Log Error :", err)
 		}
 	}
 }
@@ -178,7 +178,7 @@ func (log *Logger) Error(msg string, args ...interface{}) {
 func (log *Logger) Close() {
 	for _, w := range log.writer {
 		if err := w.Close(); err != nil {
-			fmt.Errorf("logger close error:%v", err)
+			fmt.Println("logger close error:", err)
 		}
 	}
 }

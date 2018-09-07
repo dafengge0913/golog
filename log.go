@@ -27,7 +27,7 @@ const (
 const (
 	defaultDateFormat           = "2006-01-02"
 	defaultDateTimeFormat       = "2006-01-02 15:04:05.000"
-	defaultLogFormatPrefixPrint = "[%-5s] [%s] : %s -> %s \n"
+	defaultLogFormatPrefixPrint = "[%-5s] [%s] : %s%s \n"
 	defaultFuncSkip             = 3
 )
 
@@ -46,6 +46,7 @@ func init() {
 type config struct {
 	isPrint        bool
 	printColor     bool
+	printPath      bool
 	dateFormat     string
 	dateTimeFormat string
 	funcSkip       int
@@ -55,6 +56,7 @@ func NewConfig() *config {
 	return &config{
 		isPrint:        true,
 		printColor:     true,
+		printPath:      true,
 		dateFormat:     defaultDateFormat,
 		dateTimeFormat: defaultDateTimeFormat,
 		funcSkip:       defaultFuncSkip,
@@ -87,6 +89,10 @@ func (log *Logger) SetPrintColor(printColor bool) {
 	} else {
 		log.printer = NewPlainPrinter()
 	}
+}
+
+func (cfg *config) SetPrintPath(printPath bool) {
+	cfg.printPath = printPath
 }
 
 type IPrinter interface {
@@ -134,7 +140,7 @@ func (log *Logger) doLog(level LevelType, msg string, args ...interface{}) {
 	}
 	fMsg := fmt.Sprintf(msg, args...)
 	t := time.Now()
-	caller := getFuncCaller(log.funcSkip)
+	caller := log.getFuncCaller()
 	if log.needPrint(level) {
 		str := fmt.Sprintf(defaultLogFormatPrefixPrint, getLevelFlagMsg(level), log.getDateTimeStr(t), caller, fMsg)
 		if err := log.printer.Print(level, str); err != nil {
@@ -200,7 +206,10 @@ func getLevelFlagMsg(level LevelType) string {
 	}
 }
 
-func getFuncCaller(n int) string {
-	_, file, line, _ := runtime.Caller(n)
-	return file + ":" + strconv.Itoa(line)
+func (log *Logger) getFuncCaller() string {
+	if !log.printPath {
+		return ""
+	}
+	_, file, line, _ := runtime.Caller(log.funcSkip)
+	return file + ":" + strconv.Itoa(line) + " -> "
 }

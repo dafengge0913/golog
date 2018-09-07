@@ -90,6 +90,12 @@ func TestColor(t *testing.T) {
 	log.Error("Error msg")
 }
 
+func TestPrintPath(t *testing.T) {
+	log := NewLogger(LevelDebug)
+	log.Info("Info msg")
+	log.SetPrintPath(false)
+	log.Info("Info msg")
+}
 
 var n = 0
 

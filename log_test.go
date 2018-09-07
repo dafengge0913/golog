@@ -72,6 +72,25 @@ func TestMultiLogWriter(t *testing.T) {
 	log.Close()
 }
 
+func TestColor(t *testing.T) {
+	log := NewLogger(LevelDebug)
+	log.Debug("Debug msg")
+	log.Info("Info msg")
+	log.Warn("Warn msg")
+	log.Error("Error msg")
+	log.SetPrintColor(false)
+	log.Debug("Debug msg")
+	log.Info("Info msg")
+	log.Warn("Warn msg")
+	log.Error("Error msg")
+	log.SetPrintColor(true)
+	log.Debug("Debug msg")
+	log.Info("Info msg")
+	log.Warn("Warn msg")
+	log.Error("Error msg")
+}
+
+
 var n = 0
 
 func BenchmarkPrint(b *testing.B) {

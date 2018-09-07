@@ -45,6 +45,7 @@ func init() {
 
 type config struct {
 	isPrint        bool
+	printColor     bool
 	dateFormat     string
 	dateTimeFormat string
 	funcSkip       int
@@ -53,6 +54,7 @@ type config struct {
 func NewConfig() *config {
 	return &config{
 		isPrint:        true,
+		printColor:     true,
 		dateFormat:     defaultDateFormat,
 		dateTimeFormat: defaultDateTimeFormat,
 		funcSkip:       defaultFuncSkip,
@@ -73,6 +75,18 @@ func (cfg *config) SetFuncSkip(skip int) {
 
 func (cfg *config) SetIsPrint(isPrint bool) {
 	cfg.isPrint = isPrint
+}
+
+func (log *Logger) SetPrintColor(printColor bool) {
+	if log.printColor == printColor {
+		return
+	}
+	log.printColor = printColor
+	if printColor {
+		log.printer = NewPrinter()
+	} else {
+		log.printer = NewPlainPrinter()
+	}
 }
 
 type IPrinter interface {

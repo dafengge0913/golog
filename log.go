@@ -81,7 +81,7 @@ type ILogWriter interface {
 type Logger struct {
 	*config
 	level   LevelType
-	writer  ILogWriter
+	writer  []ILogWriter
 	printer IPrinter
 }
 
@@ -92,7 +92,7 @@ type logEntity struct {
 	caller string
 }
 
-func NewLogger(level LevelType, writer ILogWriter) *Logger {
+func NewLogger(level LevelType, writer ...ILogWriter) *Logger {
 	logger := &Logger{
 		level:   level,
 		writer:  writer,
@@ -113,14 +113,14 @@ func (log *Logger) doLog(level LevelType, msg string, args ...interface{}) {
 			fmt.Print(str)
 		}
 	}
-	if log.writer != nil {
+	for _, w := range log.writer {
 		le := pool.Get().(*logEntity)
 		le.msg = fMsg
 		le.level = level
 		le.time = t
 		le.caller = caller
-		if err := log.writer.Write(le); err != nil {
-			fmt.Println("[Write Log Error] :", err)
+		if err := w.Write(le); err != nil {
+			fmt.Errorf("[Write Log Error] :%v", err)
 		}
 	}
 }
@@ -141,11 +141,12 @@ func (log *Logger) Error(msg string, args ...interface{}) {
 	log.doLog(LevelError, msg, args...)
 }
 
-func (log *Logger) Close() error {
-	if log.writer != nil {
-		return log.writer.Close()
+func (log *Logger) Close() {
+	for _, w := range log.writer {
+		if err := w.Close(); err != nil {
+			fmt.Errorf("logger close error:%v", err)
+		}
 	}
-	return nil
 }
 
 func (log *Logger) getDateStr(t time.Time) string {

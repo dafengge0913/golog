@@ -49,7 +49,7 @@ import (
 
 func main() {
 	writeCfg := golog.NewLogWriterConfig()
-	// cache size for chan
+	// cache size of chan
 	writeCfg.SetCacheSize(1024)
 	// interval of flush to disk
 	writeCfg.SetSaveInterval(time.Second * 5)

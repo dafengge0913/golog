@@ -1,5 +1,5 @@
 # golog
-Simple logging library for Golang
+Simple logging library for Golang.
 
 ## Installation  
 
@@ -26,14 +26,14 @@ func main() {
 
 ## Color  
 
-Supported in Windows and Linux for now, This feature could be canceled by this setting :  
+Supported in Windows and Linux for now, this feature could be canceled by this setting :  
 ```golang
 log.SetPrintColor(false)
 ```
 and also could be activate anytime you want by set this to `true`.
 
 ## File path
-File path and line number are optional, If you don't want this, do that :
+File path and line number are optional, if you don't want this, do that :
 ```golang
 log.SetPrintPath(false)
 ```
@@ -75,13 +75,13 @@ func main() {
 	log.Close()
 }
 ```
-You can create a file writer by call `golog.NewLogWriterFile`, For performance purpose, `LogWriterFile` is an asynchronous log recorder. when you spawn log message, it will be temporary stored in a chan, and flush to disk by a goroutine later.
-**So it's important to call `Close()` before your application exit, make sure all message has been flushed in disk**
+You can create a file writer by call `golog.NewLogWriterFile`. For performance purpose, `LogWriterFile` is an asynchronous log recorder. When you spawn log message, it will be temporary stored in a chan, and flush to disk by a goroutine later.
+**So it's important to call `Close()` before your application exit, make sure all message has been flushed in disk.**
 
-If you use all default settings for `LogWriterFile`, there is no need for creating a `logWriterConfig`, you can just pass a `nil` like this :
+If you use all default settings for `LogWriterFile`, there is no need to create a `logWriterConfig`, you can just pass a `nil` like this :
 ```golang
 writer, err := NewLogWriterFile(LevelDebug, "D:/dfg", "demo_log", true, nil)
 ```
 
 ## License
-Under the [MIT License](https://github.com/dafengge0913/golog/blob/master/LICENSE)
+Under the [MIT License](https://github.com/dafengge0913/golog/blob/master/LICENSE) .

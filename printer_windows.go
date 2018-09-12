@@ -11,7 +11,6 @@ import (
 
 const (
 	colorWhite  uintptr = 7
-	colorGray   uintptr = 8
 	colorGreen  uintptr = 10
 	colorBlue   uintptr = 11
 	colorRed    uintptr = 12
@@ -77,7 +76,7 @@ func (printer *Printer) Print(level LevelType, str string) error {
 func (printer *Printer) getColorByLevel(level LevelType) uintptr {
 	switch level {
 	case LevelDebug:
-		return colorGray
+		return colorWhite
 	case LevelInfo:
 		return colorGreen
 	case LevelWarn:

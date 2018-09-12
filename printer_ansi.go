@@ -7,7 +7,6 @@ import (
 const (
 	ansiColorFormat = "\033[1;%dm%s\033[m"
 
-	ansiColorGray   = 30
 	ansiColorRed    = 31
 	ansiColorGreen  = 32
 	ansiColorYellow = 33
@@ -23,7 +22,7 @@ func ansiPrint(level LevelType, str string) error {
 func getColorByLevel(level LevelType) int {
 	switch level {
 	case LevelDebug:
-		return ansiColorGray
+		return ansiColorWhite
 	case LevelInfo:
 		return ansiColorGreen
 	case LevelWarn:

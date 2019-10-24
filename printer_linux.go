@@ -2,10 +2,6 @@
 
 package golog
 
-import (
-	"fmt"
-)
-
 type Printer struct {
 }
 

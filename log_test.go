@@ -10,7 +10,7 @@ import (
 func TestLogFile(t *testing.T) {
 	writeCfg := NewLogWriterConfig()
 	writeCfg.SetSaveInterval(time.Second)
-	writer, err := NewLogWriterFile(LevelInfo, "D:/dfg", "demo_log", true, writeCfg)
+	writer, err := NewLogWriterFile(LevelInfo, "output", "demo_log", true, writeCfg)
 	if err != nil {
 		t.Error("create log error:", err)
 		return
@@ -55,11 +55,11 @@ func TestLogFileConcurrent(t *testing.T) {
 func TestMultiLogWriter(t *testing.T) {
 	writeCfg := NewLogWriterConfig()
 	writeCfg.SetSaveInterval(time.Second)
-	writer, err := NewLogWriterFile(LevelInfo, "D:/dfg", "demo_log", true, writeCfg)
+	writer, err := NewLogWriterFile(LevelInfo, "output", "demo_log", true, writeCfg)
 
 	errWriteCfg := NewLogWriterConfig()
 	errWriteCfg.SetSaveInterval(time.Second)
-	errWriter, err := NewLogWriterFile(LevelError, "D:/dfg", "demo_log_error", true, errWriteCfg)
+	errWriter, err := NewLogWriterFile(LevelError, "output", "demo_log_error", true, errWriteCfg)
 	if err != nil {
 		t.Error("create log error:", err)
 		return
@@ -110,7 +110,7 @@ func BenchmarkPrint(b *testing.B) {
 func BenchmarkWriterFile(b *testing.B) {
 	writeCfg := NewLogWriterConfig()
 	writeCfg.SetSaveInterval(time.Second)
-	writer, err := NewLogWriterFile(LevelDebug, "D:/dfg", "demo_log", true, writeCfg)
+	writer, err := NewLogWriterFile(LevelDebug, "output", "demo_log", true, writeCfg)
 	if err != nil {
 		b.Error("create log error:", err)
 		return
